@@ -1,0 +1,130 @@
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <random>
+#include <fstream>
+#include <string>
+
+class heap {
+private:
+	std::vector<int> heap_array;
+
+
+public:
+	heap(std::vector<int> h) : heap_array(h) {}
+	heap() {}
+
+	bool is_leer() {
+		return heap_array.size() == 0;
+	}
+
+	int size() {
+		return heap_array.size();
+	}
+
+	void print() {
+		for (int i : heap_array) {
+			std::cout << i << "; ";
+		}
+		std::cout << std::endl;
+	}
+
+	void add(int index_to_add, int value_to_add) {
+		int index_of_kind_l = index_to_add * 2 + 1;
+		int index_of_kind_r = index_to_add * 2 + 2;
+		
+
+		
+		if (index_to_add + 1 <= size() && heap_array[index_to_add] > value_to_add) {
+			int value = heap_array[index_to_add];
+			heap_array[index_to_add] = value_to_add;
+
+			unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+			std::minstd_rand0 generator(seed + this->size());
+
+			int ni = index_of_kind_l;
+			if (generator() > generator.max() / 2) {
+				int ni = index_of_kind_r;
+			}
+
+			this->add(ni, value);
+		} else if (index_to_add + 1 <= size() && heap_array[index_to_add] < value_to_add) {
+			unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+			std::minstd_rand0 generator(seed + this->size());
+
+			int ni = index_of_kind_l;
+			if (generator() > generator.max() / 2) {
+				int ni = index_of_kind_r;
+			}
+
+			this->add(ni, value_to_add);
+		}
+		else if (index_of_kind_l >= (size()) || index_of_kind_r >= (size())) {
+			heap_array.push_back(value_to_add);
+		}
+	}
+
+	int remove_max() {
+		int value = heap_array[0];
+		int lvalue = *(heap_array.end() - 1);
+		heap_array.erase(heap_array.begin());
+		heap_array.erase(heap_array.end() - 1);
+
+		add(lvalue);
+		
+		return value;
+	}
+
+	void add(int value_to_add) {
+		this->add(0, value_to_add);
+	}
+
+};
+
+int main() {
+	heap a;
+	std::string line;
+	std::ifstream myfile("C:\\Users\\SeredaI-MSGYM\\Desktop\\100_mio_zahlen.txt");
+
+	int c = 0;
+	std::chrono::high_resolution_clock::time_point tps = std::chrono::high_resolution_clock::now();
+
+
+	if (myfile.is_open())
+	{
+		while (std::getline(myfile, line))
+		{
+			c++;
+			if (c % 1000000 == 0) {
+				std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
+				std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(tp - tps).count() << std::endl;
+				std::cout << c << std::endl;
+			}
+				;
+			a.add(std::stoi(line));
+		}
+		myfile.close();
+	}
+	std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
+	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(tp - tps).count() << std::endl;
+
+	std::cout << "------------" << std::endl;
+
+	std::chrono::high_resolution_clock::time_point tps = std::chrono::high_resolution_clock::now();
+
+	while (!a.is_leer()) {
+		c--;
+		if (c % 1000000 == 0) {
+			std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
+			std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(tp - tps).count() << std::endl;
+			std::cout << c << std::endl;
+		}
+		a.remove_max();
+	}
+
+	std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
+	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(tp - tps).count() << std::endl;
+
+
+	return 0;
+}
